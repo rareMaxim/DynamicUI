@@ -3,23 +3,23 @@ unit DynamicUI;
 interface
 
 uses
-  System.Rtti,
-  System.Classes,
-  FMX.Types;
+  System.Rtti, System.Classes, FMX.Types, System.Generics.Collections;
 
 type
   IduiModule = interface
     ['{FC116234-E717-4AF4-95AA-20D2EB98B8A6}']
- //   function SetProperty(const AName: string; AValue: TValue): IduiModule;
+    // function SetProperty(const AName: string; AValue: TValue): IduiModule;
   end;
 
   TduiModule = class(TInterfacedObject, IduiModule)
   private
-    FType: TRttiType;
+    FType: TRttiInstanceType;
+    FParent: TFmxObject;
+    FModule: TValue;
   protected
     procedure DoInitRttiType;
   public
-    constructor Create(ARttiType: TRttiType);
+    constructor Create(ARttiType: TRttiType; AParent: TFmxObject);
   end;
 
   TDynamicUI = class(TComponent)
@@ -51,15 +51,21 @@ begin
 end;
 
 function TDynamicUI.NewModule(const AQualifiedName: string): IduiModule;
+var
+  LType: TRttiType;
 begin
-  Result := TduiModule.Create(FRttiCtx.FindType(AQualifiedName));
+  Result := nil;
+  LType := FRttiCtx.FindType(AQualifiedName);
+  if LType <> nil then
+    Result := TduiModule.Create(LType, FLayout);
 end;
 
 { TduiModule }
 
-constructor TduiModule.Create(ARttiType: TRttiType);
+constructor TduiModule.Create(ARttiType: TRttiType; AParent: TFmxObject);
 begin
-  FType := ARttiType;
+  FType := ARttiType.AsInstance;
+  FParent := AParent;
   DoInitRttiType;
 end;
 
@@ -68,13 +74,13 @@ var
   LConstructorMethod: TRttiMethod;
 begin
   for LConstructorMethod in FType.GetMethods do
-  begin
     if LConstructorMethod.IsConstructor then
     begin
-
+      FModule := LConstructorMethod.Invoke(FType.MetaclassType, [FParent]);
+    //  FParent.AddObject(FModule.AsType<TFmxObject>);
+    //  t.GetProperty('Parent').SetValue(FType.Handle, FParent);
     end;
 
-  end;
 end;
 
 end.

@@ -7,5 +7,12 @@ object Form6: TForm6
   FormFactor.Width = 320
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
   DesignerMasterStyle = 0
+  object btn1: TButton
+    Position.X = 432.000000000000000000
+    Position.Y = 168.000000000000000000
+    TabOrder = 1
+    Text = 'btn1'
+  end
 end

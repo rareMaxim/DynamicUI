@@ -3,12 +3,15 @@ unit DynamicUI;
 interface
 
 uses
-  System.Rtti, System.Classes, FMX.Types, System.Generics.Collections;
+  System.Rtti,
+  System.Classes,
+  FMX.Types,
+  System.Generics.Collections;
 
 type
   IduiModule = interface
     ['{FC116234-E717-4AF4-95AA-20D2EB98B8A6}']
-    // function SetProperty(const AName: string; AValue: TValue): IduiModule;
+    function SetProperty(const AName: string; AValue: TValue): IduiModule;
   end;
 
   TduiModule = class(TInterfacedObject, IduiModule)
@@ -19,6 +22,7 @@ type
   protected
     procedure DoInitRttiType;
   public
+    function SetProperty(const AName: string; AValue: TValue): IduiModule;
     constructor Create(ARttiType: TRttiType; AParent: TFmxObject);
   end;
 
@@ -70,17 +74,15 @@ begin
 end;
 
 procedure TduiModule.DoInitRttiType;
-var
-  LConstructorMethod: TRttiMethod;
 begin
-  for LConstructorMethod in FType.GetMethods do
-    if LConstructorMethod.IsConstructor then
-    begin
-      FModule := LConstructorMethod.Invoke(FType.MetaclassType, [FParent]);
-    //  FParent.AddObject(FModule.AsType<TFmxObject>);
-    //  t.GetProperty('Parent').SetValue(FType.Handle, FParent);
-    end;
+  FModule := FType.GetMethod('Create').Invoke(FType.MetaclassType, [nil]);
+  SetProperty('Parent', TValue.From(FParent));
+end;
 
+function TduiModule.SetProperty(const AName: string; AValue: TValue): IduiModule;
+begin
+  FType.GetProperty(AName).SetValue(FModule.AsObject, AValue);
+  Result := Self;
 end;
 
 end.

@@ -15,4 +15,11 @@ object Form6: TForm6
     TabOrder = 1
     Text = 'btn1'
   end
+  object Layout1: TLayout
+    Align = Left
+    Size.Width = 337.000000000000000000
+    Size.Height = 480.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 2
+  end
 end
